@@ -40,12 +40,6 @@ function handleLogout() {
     <header class="site-header">
       <div class="header-inner">
         <div class="header-brand">
-          <img
-            src="/logo.png"
-            alt="Vrijzinnig Groot-Lier logo"
-            class="header-logo"
-            @error="$event.target.style.display = 'none'"
-          />
           <div class="header-title">
             <span class="header-org">Vrijzinnig Groot-Lier</span>
             <span class="header-event">Vrijzinnige Feesten 2026 – Foto's</span>

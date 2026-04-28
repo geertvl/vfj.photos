@@ -156,11 +156,6 @@ a:hover {
   gap: 14px;
 }
 
-.header-logo {
-  height: 48px;
-  width: auto;
-}
-
 .header-title {
   display: flex;
   flex-direction: column;
