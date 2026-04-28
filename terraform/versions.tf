@@ -24,11 +24,6 @@ terraform {
 }
 
 provider "azurerm" {
-  features {
-    key_vault {
-      # Allows re-running `terraform destroy` + `terraform apply` cleanly
-      purge_soft_delete_on_destroy    = true
-      recover_soft_deleted_key_vaults = true
-    }
-  }
+  subscription_id = var.subscription_id
+  features {}
 }

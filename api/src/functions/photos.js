@@ -1,10 +1,10 @@
 const { app } = require('@azure/functions')
 const {
   BlobServiceClient,
+  StorageSharedKeyCredential,
   generateBlobSASQueryParameters,
   BlobSASPermissions,
 } = require('@azure/storage-blob')
-const { DefaultAzureCredential } = require('@azure/identity')
 const jwt = require('jsonwebtoken')
 
 const CATEGORIES = [
@@ -49,38 +49,32 @@ app.http('photos', {
     }
 
     const accountName = process.env.STORAGE_ACCOUNT_NAME
+    const accountKey = process.env.STORAGE_ACCOUNT_KEY
     const containerName = process.env.STORAGE_CONTAINER_NAME ?? 'photos'
 
-    if (!accountName) {
-      context.error('STORAGE_ACCOUNT_NAME not set')
+    if (!accountName || !accountKey) {
+      context.error('STORAGE_ACCOUNT_NAME or STORAGE_ACCOUNT_KEY not set')
       return { status: 500, jsonBody: { error: 'Serverconfiguratiefout' } }
     }
 
     try {
-      const credential = new DefaultAzureCredential()
+      const credential = new StorageSharedKeyCredential(accountName, accountKey)
       const blobServiceClient = new BlobServiceClient(
         `https://${accountName}.blob.core.windows.net`,
         credential
       )
       const containerClient = blobServiceClient.getContainerClient(containerName)
 
-      // User delegation key valid for 25 hours (5-minute buffer at start)
       const startsOn = new Date()
       startsOn.setMinutes(startsOn.getMinutes() - 5)
       const expiresOn = new Date()
       expiresOn.setHours(expiresOn.getHours() + 25)
-      const userDelegationKey = await blobServiceClient.getUserDelegationKey(
-        startsOn,
-        expiresOn
-      )
 
       const categories = []
 
       for (const category of CATEGORIES) {
         const photos = []
-        for await (const blob of containerClient.listBlobsFlat({
-          prefix: category.prefix,
-        })) {
+        for await (const blob of containerClient.listBlobsFlat({ prefix: category.prefix })) {
           if (!/\.(jpe?g|png|gif|webp)$/i.test(blob.name)) continue
 
           const filename = blob.name.split('/').pop()
@@ -93,8 +87,7 @@ app.http('photos', {
               expiresOn,
               contentDisposition: `attachment; filename="${filename}"`,
             },
-            userDelegationKey,
-            accountName
+            credential
           ).toString()
 
           photos.push({
@@ -115,7 +108,7 @@ app.http('photos', {
       return { status: 200, jsonBody: { categories } }
     } catch (err) {
       context.error('Error fetching photos:', err)
-      return { status: 500, jsonBody: { error: 'Fout bij ophalen van foto\'s' } }
+      return { status: 500, jsonBody: { error: "Fout bij ophalen van foto's" } }
     }
   },
 })

@@ -4,9 +4,12 @@
 #
 # terraform.tfvars is listed in .gitignore so it will never be committed.
 # Prefer setting the password via an environment variable so it never
-# touches disk:
+# touches disk (PowerShell):
 #
-#   export TF_VAR_gallery_password="KiesEenSterkWachtwoord2026"
+#   $env:TF_VAR_gallery_password = "KiesEenSterkWachtwoord2026"
+
+# Find your subscription ID with: az account show --query id -o tsv
+subscription_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
 prefix              = "vfj-photos"
 resource_group_name = "rg-vfj-photos"
@@ -14,8 +17,13 @@ location            = "westeurope"
 
 # gallery_password = "KiesEenSterkWachtwoord2026"  ← or use TF_VAR_ above
 
-# Extra origins allowed by Blob Storage CORS during local development.
-# Remove or leave empty once you no longer need local dev access.
+# CORS origins for Blob Storage photo downloads.
+# Step 1 — leave as ["*"] for the first deploy (SWA URL not known yet).
+# Step 2 — after deploy, replace with your actual SWA URL and re-run apply:
+#   cors_origins = ["https://vfj-photos.azurestaticapps.net"]
+cors_origins = ["*"]
+
+# Extra origins for local development — safe to leave in.
 local_dev_cors_origins = ["http://localhost:5173"]
 
 tags = {

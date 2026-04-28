@@ -12,14 +12,11 @@ resource "azurerm_static_web_app" "main" {
   sku_tier            = "Free"
   sku_size            = "Free"
 
-  identity {
-    type = "SystemAssigned"
-  }
-
   app_settings = {
     GALLERY_PASSWORD       = var.gallery_password
     JWT_SECRET             = random_password.jwt_secret.result
     STORAGE_ACCOUNT_NAME   = azurerm_storage_account.main.name
+    STORAGE_ACCOUNT_KEY    = azurerm_storage_account.main.primary_access_key
     STORAGE_CONTAINER_NAME = azurerm_storage_container.photos.name
   }
 

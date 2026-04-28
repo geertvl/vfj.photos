@@ -1,6 +1,3 @@
-# Current Azure login context
-data "azurerm_client_config" "current" {}
-
 # Short random suffix to ensure a globally unique storage account name
 resource "random_string" "suffix" {
   length  = 5

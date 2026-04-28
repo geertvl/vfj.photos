@@ -1,6 +1,5 @@
 const { app } = require('@azure/functions')
-const { BlobServiceClient } = require('@azure/storage-blob')
-const { DefaultAzureCredential } = require('@azure/identity')
+const { BlobServiceClient, StorageSharedKeyCredential } = require('@azure/storage-blob')
 const jwt = require('jsonwebtoken')
 const archiver = require('archiver')
 
@@ -17,7 +16,6 @@ function verifyToken(request) {
   }
 }
 
-// Sanitise a blob path to prevent path traversal
 function sanitisePath(p) {
   return String(p)
     .replace(/\.\./g, '')
@@ -43,32 +41,29 @@ app.http('download', {
 
     const { photos } = body ?? {}
     if (!Array.isArray(photos) || photos.length === 0) {
-      return { status: 400, jsonBody: { error: 'Geen foto\'s opgegeven' } }
+      return { status: 400, jsonBody: { error: "Geen foto's opgegeven" } }
     }
     if (photos.length > MAX_PHOTOS) {
-      return {
-        status: 400,
-        jsonBody: { error: `Maximum ${MAX_PHOTOS} foto's per download` },
-      }
+      return { status: 400, jsonBody: { error: `Maximum ${MAX_PHOTOS} foto's per download` } }
     }
 
     const accountName = process.env.STORAGE_ACCOUNT_NAME
+    const accountKey = process.env.STORAGE_ACCOUNT_KEY
     const containerName = process.env.STORAGE_CONTAINER_NAME ?? 'photos'
 
-    if (!accountName) {
-      context.error('STORAGE_ACCOUNT_NAME not set')
+    if (!accountName || !accountKey) {
+      context.error('STORAGE_ACCOUNT_NAME or STORAGE_ACCOUNT_KEY not set')
       return { status: 500, jsonBody: { error: 'Serverconfiguratiefout' } }
     }
 
     try {
-      const credential = new DefaultAzureCredential()
+      const credential = new StorageSharedKeyCredential(accountName, accountKey)
       const blobServiceClient = new BlobServiceClient(
         `https://${accountName}.blob.core.windows.net`,
         credential
       )
       const containerClient = blobServiceClient.getContainerClient(containerName)
 
-      // Build zip in memory
       const archive = archiver('zip', { zlib: { level: 5 } })
       const chunks = []
 
@@ -83,8 +78,7 @@ app.http('download', {
         try {
           const blobClient = containerClient.getBlobClient(blobPath)
           const download = await blobClient.download()
-          const filename = blobPath.split('/').pop()
-          archive.append(download.readableStreamBody, { name: filename })
+          archive.append(download.readableStreamBody, { name: blobPath.split('/').pop() })
         } catch (err) {
           context.warn(`Skipping blob ${rawPath}: ${err.message}`)
         }
@@ -100,8 +94,7 @@ app.http('download', {
         body: zipBuffer,
         headers: {
           'Content-Type': 'application/zip',
-          'Content-Disposition':
-            'attachment; filename="vrijzinnige-feesten-2026.zip"',
+          'Content-Disposition': 'attachment; filename="vrijzinnige-feesten-2026.zip"',
           'Content-Length': String(zipBuffer.length),
         },
       }

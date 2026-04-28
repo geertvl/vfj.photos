@@ -16,13 +16,9 @@ resource "azurerm_storage_account" "main" {
       allowed_headers    = ["*"]
       exposed_headers    = ["Content-Disposition", "Content-Length", "Content-Type"]
       max_age_in_seconds = 86400
-
-      # SWA hostname is only known after the Static Web App is created, so
-      # Terraform will create the storage account after the SWA resource.
-      allowed_origins = concat(
-        ["https://${azurerm_static_web_app.main.default_host_name}"],
-        var.local_dev_cors_origins
-      )
+      # Azure Storage does not allow mixing "*" with specific origins.
+      # When cors_origins is ["*"] it already covers everything, so skip the concat.
+      allowed_origins = contains(var.cors_origins, "*") ? ["*"] : concat(var.cors_origins, var.local_dev_cors_origins)
     }
   }
 
