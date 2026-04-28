@@ -1,0 +1,24 @@
+# Copy this file to terraform.tfvars and fill in your values.
+#
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# terraform.tfvars is listed in .gitignore so it will never be committed.
+# Prefer setting the password via an environment variable so it never
+# touches disk:
+#
+#   export TF_VAR_gallery_password="KiesEenSterkWachtwoord2026"
+
+prefix              = "vfj-photos"
+resource_group_name = "rg-vfj-photos"
+location            = "westeurope"
+
+# gallery_password = "KiesEenSterkWachtwoord2026"  ← or use TF_VAR_ above
+
+# Extra origins allowed by Blob Storage CORS during local development.
+# Remove or leave empty once you no longer need local dev access.
+local_dev_cors_origins = ["http://localhost:5173"]
+
+tags = {
+  environment = "production"
+  project     = "vfj-photos-2026"
+}

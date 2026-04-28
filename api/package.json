@@ -1,0 +1,21 @@
+{
+  "name": "vfj-photos-api",
+  "version": "1.0.0",
+  "description": "Azure Functions API for VFJ Photos gallery",
+  "main": "src/functions/*.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests configured\""
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.5.0",
+    "@azure/identity": "^4.4.1",
+    "@azure/keyvault-secrets": "^4.9.0",
+    "@azure/storage-blob": "^12.25.0",
+    "archiver": "^7.0.1",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
