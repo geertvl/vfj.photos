@@ -22,3 +22,9 @@ resource "azurerm_static_web_app" "main" {
 
   tags = local.tags
 }
+
+resource "azurerm_static_web_app_custom_domain" "main" {
+  static_web_app_id = azurerm_static_web_app.main.id
+  domain_name       = var.custom_domain
+  validation_type   = "cname-delegation"
+}

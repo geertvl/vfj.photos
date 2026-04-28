@@ -40,6 +40,11 @@ function handleLogout() {
     <header class="site-header">
       <div class="header-inner">
         <div class="header-brand">
+          <img
+            src="https://www.vrijzinniggrootlier.be/assets/fakkel-D8sZj-WP.png"
+            alt="Vrijzinnig Groot-Lier"
+            class="header-logo"
+          />
           <div class="header-title">
             <span class="header-org">Vrijzinnig Groot-Lier</span>
             <span class="header-event">Vrijzinnige Feesten 2026 – Foto's</span>

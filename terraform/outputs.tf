@@ -3,6 +3,16 @@ output "app_url" {
   value       = "https://${azurerm_static_web_app.main.default_host_name}"
 }
 
+output "custom_domain_url" {
+  description = "Custom domain URL (active once DNS is configured)."
+  value       = "https://${var.custom_domain}"
+}
+
+output "cname_target" {
+  description = "Add this as a CNAME record for fotos.vrijzinniggrootlier.be in your DNS."
+  value       = azurerm_static_web_app.main.default_host_name
+}
+
 output "deployment_token" {
   description = <<-EOT
     GitHub Actions deployment token.

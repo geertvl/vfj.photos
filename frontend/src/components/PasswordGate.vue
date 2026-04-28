@@ -137,7 +137,7 @@ async function handleSubmit() {
 
 .gate-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(30, 77, 140, 0.15);
+  box-shadow: 0 0 0 3px rgba(239, 13, 13, 0.15);
 }
 
 .gate-input--error {

@@ -1,16 +1,16 @@
 /* ─── Design tokens ─────────────────────────────────────────────────────── */
 :root {
-  --primary:       #1E4D8C;
-  --primary-dark:  #143566;
-  --primary-light: #EEF3FA;
-  --accent:        #E8841A;
-  --accent-dark:   #C46A0E;
-  --accent-light:  #FDF3E8;
-  --bg:            #F5F5F2;
+  --primary:       #EF0D0D;  /* VFJ red */
+  --primary-dark:  #C20A0A;
+  --primary-light: rgba(239, 13, 13, 0.08);
+  --accent:        #E85638;  /* orange-red */
+  --accent-dark:   #C9421E;
+  --accent-light:  rgba(232, 86, 56, 0.12);
+  --bg:            #B4D4C1;  /* sage green from vrijzinniggrootlier.be */
   --surface:       #FFFFFF;
-  --text:          #1C2B3A;
-  --text-muted:    #6B7C8F;
-  --border:        #DDE3EB;
+  --text:          #2C3E50;  /* dark indigo from main site */
+  --text-muted:    #5D7A6B;
+  --border:        #C5DAD0;
   --error:         #C0392B;
   --error-light:   #FDEDEC;
   --success:       #27AE60;
@@ -132,9 +132,10 @@ a:hover {
 }
 
 .site-header {
-  background: var(--primary-dark);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  background: #fff;
+  color: var(--text);
+  border-bottom: 3px solid var(--primary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -156,6 +157,14 @@ a:hover {
   gap: 14px;
 }
 
+.header-logo {
+  height: 52px;
+  width: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
 .header-title {
   display: flex;
   flex-direction: column;
@@ -164,8 +173,8 @@ a:hover {
 
 .header-org {
   font-size: 0.78rem;
-  font-weight: 500;
-  opacity: 0.8;
+  font-weight: 600;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -173,22 +182,24 @@ a:hover {
 .header-event {
   font-size: 1.1rem;
   font-weight: 700;
+  color: var(--primary);
 }
 
 .btn-logout {
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.3);
-  color: #fff;
+  background: transparent;
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
   padding: 8px 16px;
   border-radius: var(--radius);
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   font-family: inherit;
-  transition: background var(--transition);
+  transition: background var(--transition), color var(--transition);
 }
 
 .btn-logout:hover {
-  background: rgba(255,255,255,0.22);
+  background: var(--primary);
+  color: #fff;
 }
 
 .site-main {
@@ -196,8 +207,9 @@ a:hover {
 }
 
 .site-footer {
-  background: var(--primary-dark);
-  color: rgba(255,255,255,0.65);
+  background: #fff;
+  color: var(--text-muted);
+  border-top: 3px solid var(--primary);
   text-align: center;
   padding: 18px 20px;
   font-size: 0.85rem;
@@ -205,7 +217,8 @@ a:hover {
 }
 
 .site-footer a {
-  color: rgba(255,255,255,0.85);
+  color: var(--primary);
+  font-weight: 500;
 }
 
 /* ─── Spinner ───────────────────────────────────────────────────────────── */
@@ -220,7 +233,7 @@ a:hover {
 }
 
 .spinner-dark {
-  border-color: rgba(0,0,0,0.15);
+  border-color: rgba(0,0,0,0.12);
   border-top-color: var(--primary);
 }
 

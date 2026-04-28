@@ -35,6 +35,12 @@ variable "gallery_password" {
   sensitive = true
 }
 
+variable "custom_domain" {
+  description = "Custom domain for the photo gallery (e.g. fotos.vrijzinniggrootlier.be)."
+  type        = string
+  default     = "fotos.vrijzinniggrootlier.be"
+}
+
 variable "cors_origins" {
   description = <<-EOT
     CORS origins allowed to fetch photos directly from Blob Storage.
