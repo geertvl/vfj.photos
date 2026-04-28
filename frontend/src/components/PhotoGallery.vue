@@ -45,7 +45,7 @@ async function fetchPhotos() {
   loadError.value = ''
   try {
     const res = await fetch('/api/photos', {
-      headers: { Authorization: `Bearer ${props.token}` },
+      headers: { 'X-Gallery-Token': props.token },
     })
 
     if (res.status === 401) {
@@ -116,7 +116,7 @@ async function downloadSelected() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${props.token}`,
+        'X-Gallery-Token': props.token,
       },
       body: JSON.stringify({ photos: photoIds }),
     })

@@ -6,9 +6,8 @@ const archiver = require('archiver')
 const MAX_PHOTOS = 200
 
 function verifyToken(request) {
-  const authHeader = request.headers.get('authorization') ?? ''
-  if (!authHeader.startsWith('Bearer ')) return null
-  const token = authHeader.slice(7)
+  const token = request.headers.get('x-gallery-token') ?? ''
+  if (!token) return null
   try {
     return jwt.verify(token, process.env.JWT_SECRET)
   } catch {

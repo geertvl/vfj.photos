@@ -16,7 +16,8 @@
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
-    "X-XSS-Protection": "1; mode=block"
+    "X-XSS-Protection": "1; mode=block",
+    "Access-Control-Allow-Headers": "Content-Type, X-Gallery-Token"
   },
   "mimeTypes": {
     ".json": "application/json"
