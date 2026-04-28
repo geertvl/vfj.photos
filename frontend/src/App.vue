@@ -44,7 +44,7 @@ function handleLogout() {
             src="/logo.png"
             alt="Vrijzinnig Groot-Lier logo"
             class="header-logo"
-            @error="($event.target as HTMLImageElement).style.display = 'none'"
+            @error="$event.target.style.display = 'none'"
           />
           <div class="header-title">
             <span class="header-org">Vrijzinnig Groot-Lier</span>
