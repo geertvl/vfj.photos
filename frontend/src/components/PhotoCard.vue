@@ -1,10 +1,13 @@
 <script setup>
-defineProps({
+const props = defineProps({
   photo: { type: Object, required: true },
   selected: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['toggle-select', 'open'])
+
+// Human-readable ID: filename without extension (e.g. "IMG_1234")
+const photoLabel = props.photo.filename.replace(/\.[^.]+$/, '')
 </script>
 
 <template>
@@ -38,6 +41,9 @@ const emit = defineEmits(['toggle-select', 'open'])
         decoding="async"
       />
     </button>
+
+    <!-- Human-readable photo ID shown at the bottom of the card -->
+    <div class="photo-label" :title="photo.filename">{{ photoLabel }}</div>
   </div>
 </template>
 
@@ -122,5 +128,25 @@ const emit = defineEmits(['toggle-select', 'open'])
 .photo-card--selected .photo-select:hover .photo-check {
   background: var(--accent-dark);
   border-color: var(--accent-dark);
+}
+
+/* Photo ID label */
+.photo-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 18px 8px 6px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.55));
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  z-index: 5;
 }
 </style>
