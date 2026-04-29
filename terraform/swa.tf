@@ -13,11 +13,13 @@ resource "azurerm_static_web_app" "main" {
   sku_size            = "Free"
 
   app_settings = {
-    GALLERY_PASSWORD       = var.gallery_password
-    JWT_SECRET             = random_password.jwt_secret.result
-    STORAGE_ACCOUNT_NAME   = azurerm_storage_account.main.name
-    STORAGE_ACCOUNT_KEY    = azurerm_storage_account.main.primary_access_key
-    STORAGE_CONTAINER_NAME = azurerm_storage_container.photos.name
+    GALLERY_PASSWORD_FEEST_ZATERDAG          = var.gallery_password_feest_zaterdag
+    GALLERY_PASSWORD_LENTEFEEST_VOORMIDDAG   = var.gallery_password_lentefeest_voormiddag
+    GALLERY_PASSWORD_LENTEFEEST_NAMIDDAG     = var.gallery_password_lentefeest_namiddag
+    JWT_SECRET                               = random_password.jwt_secret.result
+    STORAGE_ACCOUNT_NAME                     = azurerm_storage_account.main.name
+    STORAGE_ACCOUNT_KEY                      = azurerm_storage_account.main.primary_access_key
+    STORAGE_CONTAINER_NAME                   = azurerm_storage_container.photos.name
   }
 
   tags = local.tags
