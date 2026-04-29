@@ -81,22 +81,29 @@ app.http('photos', {
         if (!/\.(jpe?g|png|gif|webp)$/i.test(blob.name)) continue
 
         const filename = blob.name.split('/').pop()
-        const sasToken = generateBlobSASQueryParameters(
-          {
-            containerName,
-            blobName: blob.name,
-            permissions: BlobSASPermissions.parse('r'),
-            startsOn,
-            expiresOn,
-            contentDisposition: `attachment; filename="${filename}"`,
-          },
-          credential
-        ).toString()
+
+        const makeSas = (blobName, withDisposition = false) =>
+          generateBlobSASQueryParameters(
+            {
+              containerName,
+              blobName,
+              permissions: BlobSASPermissions.parse('r'),
+              startsOn,
+              expiresOn,
+              ...(withDisposition && { contentDisposition: `attachment; filename="${filename}"` }),
+            },
+            credential
+          ).toString()
+
+        const sasToken      = makeSas(blob.name, true)
+        const thumbBlobName = `thumbnails/${blob.name}`
+        const thumbSasToken = makeSas(thumbBlobName)
 
         photos.push({
           id: blob.name,
           filename,
-          url: `https://${accountName}.blob.core.windows.net/${containerName}/${blob.name}?${sasToken}`,
+          url:          `https://${accountName}.blob.core.windows.net/${containerName}/${blob.name}?${sasToken}`,
+          thumbnailUrl: `https://${accountName}.blob.core.windows.net/${containerName}/${thumbBlobName}?${thumbSasToken}`,
         })
       }
 
