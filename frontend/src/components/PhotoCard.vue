@@ -34,11 +34,12 @@ const photoLabel = props.photo.filename.replace(/\.[^.]+$/, '')
     <!-- Thumbnail -->
     <button class="photo-thumb-btn" @click="emit('open', photo)" :title="'Foto vergroten: ' + photo.filename">
       <img
-        :src="photo.url"
+        :src="photo.thumbnailUrl || photo.url"
         :alt="photo.filename"
         class="photo-thumb"
         loading="lazy"
         decoding="async"
+        @error="$event.target.src = photo.url"
       />
     </button>
 
@@ -130,16 +131,16 @@ const photoLabel = props.photo.filename.replace(/\.[^.]+$/, '')
   border-color: var(--accent-dark);
 }
 
-/* Photo ID label */
+/* Photo ID label — always visible, shown more clearly on hover */
 .photo-label {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 18px 8px 6px;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.55));
-  color: #fff;
-  font-size: 0.7rem;
+  padding: 14px 6px 5px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-align: center;
@@ -148,5 +149,10 @@ const photoLabel = props.photo.filename.replace(/\.[^.]+$/, '')
   text-overflow: ellipsis;
   pointer-events: none;
   z-index: 5;
+  transition: color var(--transition);
+}
+
+.photo-card:hover .photo-label {
+  color: #fff;
 }
 </style>

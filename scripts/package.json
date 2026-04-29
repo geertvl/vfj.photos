@@ -1,0 +1,12 @@
+{
+  "name": "vfj-photos-scripts",
+  "version": "1.0.0",
+  "description": "Utility scripts for vfj.photos",
+  "scripts": {
+    "generate-thumbnails": "node generate-thumbnails.js"
+  },
+  "dependencies": {
+    "@azure/storage-blob": "^12.26.0",
+    "sharp": "^0.33.0"
+  }
+}
