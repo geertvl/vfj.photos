@@ -43,8 +43,15 @@ app.http('photos', {
   authLevel: 'anonymous',
   route: 'photos',
   handler: async (request, context) => {
-    if (!verifyToken(request)) {
+    const payload = verifyToken(request)
+    if (!payload) {
       return { status: 401, jsonBody: { error: 'Niet geautoriseerd' } }
+    }
+
+    // Find the single category this parent is allowed to see
+    const category = CATEGORIES.find((c) => c.id === payload.event)
+    if (!category) {
+      return { status: 403, jsonBody: { error: 'Geen toegang tot deze foto\'s' } }
     }
 
     const accountName = process.env.STORAGE_ACCOUNT_NAME
@@ -69,42 +76,43 @@ app.http('photos', {
       const expiresOn = new Date()
       expiresOn.setHours(expiresOn.getHours() + 25)
 
-      const categories = []
+      const photos = []
+      for await (const blob of containerClient.listBlobsFlat({ prefix: category.prefix })) {
+        if (!/\.(jpe?g|png|gif|webp)$/i.test(blob.name)) continue
 
-      for (const category of CATEGORIES) {
-        const photos = []
-        for await (const blob of containerClient.listBlobsFlat({ prefix: category.prefix })) {
-          if (!/\.(jpe?g|png|gif|webp)$/i.test(blob.name)) continue
+        const filename = blob.name.split('/').pop()
+        const sasToken = generateBlobSASQueryParameters(
+          {
+            containerName,
+            blobName: blob.name,
+            permissions: BlobSASPermissions.parse('r'),
+            startsOn,
+            expiresOn,
+            contentDisposition: `attachment; filename="${filename}"`,
+          },
+          credential
+        ).toString()
 
-          const filename = blob.name.split('/').pop()
-          const sasToken = generateBlobSASQueryParameters(
-            {
-              containerName,
-              blobName: blob.name,
-              permissions: BlobSASPermissions.parse('r'),
-              startsOn,
-              expiresOn,
-              contentDisposition: `attachment; filename="${filename}"`,
-            },
-            credential
-          ).toString()
-
-          photos.push({
-            id: blob.name,
-            filename,
-            url: `https://${accountName}.blob.core.windows.net/${containerName}/${blob.name}?${sasToken}`,
-          })
-        }
-
-        categories.push({
-          id: category.id,
-          name: category.name,
-          icon: category.icon,
-          photos,
+        photos.push({
+          id: blob.name,
+          filename,
+          url: `https://${accountName}.blob.core.windows.net/${containerName}/${blob.name}?${sasToken}`,
         })
       }
 
-      return { status: 200, jsonBody: { categories } }
+      return {
+        status: 200,
+        jsonBody: {
+          categories: [
+            {
+              id: category.id,
+              name: category.name,
+              icon: category.icon,
+              photos,
+            },
+          ],
+        },
+      }
     } catch (err) {
       context.error('Error fetching photos:', err)
       return { status: 500, jsonBody: { error: "Fout bij ophalen van foto's" } }
