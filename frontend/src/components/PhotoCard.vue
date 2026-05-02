@@ -1,10 +1,13 @@
 <script setup>
-defineProps({
+const props = defineProps({
   photo: { type: Object, required: true },
   selected: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['toggle-select', 'open'])
+
+// Human-readable ID: filename without extension (e.g. "IMG_1234")
+const photoLabel = props.photo.filename.replace(/\.[^.]+$/, '')
 </script>
 
 <template>
@@ -31,13 +34,17 @@ const emit = defineEmits(['toggle-select', 'open'])
     <!-- Thumbnail -->
     <button class="photo-thumb-btn" @click="emit('open', photo)" :title="'Foto vergroten: ' + photo.filename">
       <img
-        :src="photo.url"
+        :src="photo.thumbnailUrl || photo.url"
         :alt="photo.filename"
         class="photo-thumb"
         loading="lazy"
         decoding="async"
+        @error="$event.target.src = photo.url"
       />
     </button>
+
+    <!-- Human-readable photo ID shown at the bottom of the card -->
+    <div class="photo-label" :title="photo.filename">{{ photoLabel }}</div>
   </div>
 </template>
 
@@ -122,5 +129,30 @@ const emit = defineEmits(['toggle-select', 'open'])
 .photo-card--selected .photo-select:hover .photo-check {
   background: var(--accent-dark);
   border-color: var(--accent-dark);
+}
+
+/* Photo ID label — always visible, shown more clearly on hover */
+.photo-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 14px 6px 5px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  z-index: 5;
+  transition: color var(--transition);
+}
+
+.photo-card:hover .photo-label {
+  color: #fff;
 }
 </style>

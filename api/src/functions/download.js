@@ -27,9 +27,13 @@ app.http('download', {
   authLevel: 'anonymous',
   route: 'download',
   handler: async (request, context) => {
-    if (!verifyToken(request)) {
+    const payload = verifyToken(request)
+    if (!payload) {
       return { status: 401, jsonBody: { error: 'Niet geautoriseerd' } }
     }
+
+    // The allowed folder prefix for this parent
+    const allowedPrefix = `${payload.event}/`
 
     let body
     try {
@@ -44,6 +48,14 @@ app.http('download', {
     }
     if (photos.length > MAX_PHOTOS) {
       return { status: 400, jsonBody: { error: `Maximum ${MAX_PHOTOS} foto's per download` } }
+    }
+
+    // Enforce that every requested path belongs to the authenticated event
+    const sanitised = photos.map(sanitisePath)
+    const forbidden = sanitised.filter((p) => !p.startsWith(allowedPrefix))
+    if (forbidden.length > 0) {
+      context.warn(`Download blocked: paths outside allowed prefix "${allowedPrefix}":`, forbidden)
+      return { status: 403, jsonBody: { error: 'Geen toegang tot deze foto\'s' } }
     }
 
     const accountName = process.env.STORAGE_ACCOUNT_NAME
@@ -72,14 +84,13 @@ app.http('download', {
         archive.on('error', reject)
       })
 
-      for (const rawPath of photos) {
-        const blobPath = sanitisePath(rawPath)
+      for (const blobPath of sanitised) {
         try {
           const blobClient = containerClient.getBlobClient(blobPath)
           const download = await blobClient.download()
           archive.append(download.readableStreamBody, { name: blobPath.split('/').pop() })
         } catch (err) {
-          context.warn(`Skipping blob ${rawPath}: ${err.message}`)
+          context.warn(`Skipping blob ${blobPath}: ${err.message}`)
         }
       }
 

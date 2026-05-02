@@ -24,12 +24,28 @@ variable "location" {
   default     = "westeurope"
 }
 
-variable "gallery_password" {
+variable "gallery_password_feest_zaterdag" {
   description = <<-EOT
-    Shared password parents use to access the photo gallery.
-    Stored as a plain app setting on the Static Web App.
-    Prefer setting via environment variable to keep it out of shell history:
-      PowerShell: $env:TF_VAR_gallery_password = "YourPassword2026"
+    Password for parents of the Saturday event (feest-zaterdag).
+    PowerShell: $env:TF_VAR_gallery_password_feest_zaterdag = "WachtwoordZaterdag2026"
+  EOT
+  type      = string
+  sensitive = true
+}
+
+variable "gallery_password_lentefeest_voormiddag" {
+  description = <<-EOT
+    Password for parents of the Sunday morning event (lentefeest-voormiddag).
+    PowerShell: $env:TF_VAR_gallery_password_lentefeest_voormiddag = "WachtwoordVoormiddag2026"
+  EOT
+  type      = string
+  sensitive = true
+}
+
+variable "gallery_password_lentefeest_namiddag" {
+  description = <<-EOT
+    Password for parents of the Sunday afternoon event (lentefeest-namiddag).
+    PowerShell: $env:TF_VAR_gallery_password_lentefeest_namiddag = "WachtwoordNamiddag2026"
   EOT
   type      = string
   sensitive = true
