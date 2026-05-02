@@ -4,7 +4,7 @@ Password-protected photo gallery for parents to view and download photos from th
 
 ## Features
 
-- 🔒 Password gate — single shared password stored in Azure Key Vault
+- 🔒 Password gate — one password per event, parents only see their own event's photos
 - 📂 Three event categories with photo counts
 - ✅ Multi-select with "select all in category"
 - 📥 Download selected photos as a single ZIP file
@@ -31,8 +31,7 @@ GitHub Actions
                     ├── GET  /api/photos    list blobs + generate SAS URLs
                     └── POST /api/download  stream selected photos as ZIP
 
-Azure Key Vault       gallery-password, jwt-secret
-Azure Blob Storage    private container, SAS tokens via Managed Identity
+Azure Blob Storage    private container, SAS tokens via storage account key
 ```
 
 ## Tech stack
@@ -43,7 +42,7 @@ Azure Blob Storage    private container, SAS tokens via Managed Identity
 | API | [Azure Functions v4](https://learn.microsoft.com/azure/azure-functions/) (Node 20) |
 | Hosting | [Azure Static Web Apps](https://azure.microsoft.com/products/app-service/static) |
 | Storage | [Azure Blob Storage](https://azure.microsoft.com/products/storage/blobs) |
-| Secrets | [Azure Key Vault](https://azure.microsoft.com/products/key-vault) |
+| Secrets | App settings on Azure Static Web Apps (managed by Terraform) |
 | Auth | JWT (24-hour expiry) |
 | CI/CD | GitHub Actions |
 
@@ -71,10 +70,13 @@ vfj.photos/
 │   │   └── download.js
 │   ├── host.json
 │   └── package.json
+├── scripts/                    Utility scripts
+│   ├── generate-thumbnails.js
+│   └── package.json
+├── terraform/                  Infrastructure as code
 ├── staticwebapp.config.json
 ├── .github/workflows/
 │   └── azure-static-web-apps.yml
-├── DEPLOYMENT.md
 └── LICENSE
 ```
 
@@ -95,9 +97,12 @@ Copy and edit `api/local.settings.json` (already in `.gitignore`):
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "node",
-    "GALLERY_PASSWORD": "test123",
+    "GALLERY_PASSWORD_FEEST_ZATERDAG": "WachtwoordZaterdag2026",
+    "GALLERY_PASSWORD_LENTEFEEST_VOORMIDDAG": "WachtwoordVoormiddag2026",
+    "GALLERY_PASSWORD_LENTEFEEST_NAMIDDAG": "WachtwoordNamiddag2026",
     "JWT_SECRET": "lokaal-geheim-minimaal-32-tekens-lang!!",
     "STORAGE_ACCOUNT_NAME": "jouwstorageaccount",
+    "STORAGE_ACCOUNT_KEY": "jouw-storage-account-sleutel",
     "STORAGE_CONTAINER_NAME": "photos"
   }
 }
@@ -137,7 +142,69 @@ See **[DEPLOYMENT.md](DEPLOYMENT.md)** for the full step-by-step Azure setup, in
 Upload photos into the three subfolders of the `photos` container in Azure Blob Storage.  
 The easiest way is with [Azure Storage Explorer](https://azure.microsoft.com/products/storage/storage-explorer) (free desktop app).
 
-**Tip:** Resize photos to a maximum of 2–4 MB before uploading for faster loading in the browser.
+| Blob folder | Event |
+|---|---|
+| `feest-zaterdag/` | Feest vrijzinnige jeugd — zaterdag 25/4/2026 |
+| `lentefeest-voormiddag/` | Lentefeest — zondag voormiddag 26/4/2026 |
+| `lentefeest-namiddag/` | Lentefeest — zondag namiddag 26/4/2026 |
+
+## Generating thumbnails
+
+The gallery grid shows small thumbnails for fast loading; clicking a photo opens the full-size version in the lightbox. Thumbnails are **not** generated automatically — run the script below after every batch of uploads.
+
+### First-time setup
+
+```powershell
+cd scripts
+npm install
+```
+
+### Run after every upload
+
+```powershell
+cd scripts
+node generate-thumbnails.js
+```
+
+The script:
+- Reads storage credentials automatically from `api/local.settings.json`
+- Resizes each photo to a maximum of 800 px (longest side) at 82 % JPEG quality
+- Uploads the result to `thumbnails/<event>/<filename>` in the same blob container
+- **Skips photos that already have a thumbnail** — safe to re-run at any time
+
+Example output:
+```
+Storage account : vfjphotosq42o1
+Container       : photos
+
+📁  feest-zaterdag
+·····++++++++++
+
+📁  lentefeest-voormiddag
+·····++++
+
+✅  Done!  Generated: 18  |  Already existed: 10  |  Errors: 0
+```
+
+`·` = thumbnail already existed and was skipped  
+`+` = new thumbnail generated
+
+### Removing a photo
+
+When the organisation reports a photo ID (e.g. `DSC_0042` shown on the card), delete both the original and its thumbnail:
+
+```powershell
+$account = "vfjphotosq42o1"
+$key     = "<storage-account-key>"
+
+# Delete the original
+az storage blob delete --account-name $account --account-key $key `
+  --container-name photos --name feest-zaterdag/DSC_0042.jpg
+
+# Delete the thumbnail
+az storage blob delete --account-name $account --account-key $key `
+  --container-name photos --name thumbnails/feest-zaterdag/DSC_0042.jpg
+```
 
 ## License
 
